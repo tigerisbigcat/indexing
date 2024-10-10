@@ -1,15 +1,26 @@
-let excelData = null;
+let excelData = null; // 用来存储Excel数据
 
-// 从 LocalStorage 中加载缓存的 Excel 数据
-const cachedExcelData = localStorage.getItem("excelData");
-if (cachedExcelData) {
-  excelData = JSON.parse(cachedExcelData);
-  document.getElementById("results").innerHTML =
-    "已加载缓存数据，请输入塔罗牌名称进行搜索。";
-} else {
-  document.getElementById("results").innerHTML =
-    "请先上传塔罗牌文件或等待数据加载完成。";
-}
+// 从 GitHub 加载 Excel 文件 (通过 CORS 代理)
+const githubExcelUrl =
+  "https://raw.githubusercontent.com/tigerisbigcat/indexing/main/taluo.xlsx";
+const corsProxy = "https://cors-anywhere.herokuapp.com/"; // 使用 CORS 代理
+
+// 使用 fetch 请求从 GitHub 获取文件
+fetch(corsProxy + githubExcelUrl)
+  .then((response) => response.arrayBuffer()) // 将响应转换为 ArrayBuffer
+  .then((data) => {
+    const workbook = XLSX.read(new Uint8Array(data), { type: "array" });
+    const sheetName = workbook.SheetNames[0]; // 获取第一个sheet
+    const sheet = workbook.Sheets[sheetName];
+    excelData = XLSX.utils.sheet_to_json(sheet); // 将表格数据转换为 JSON
+    console.log(excelData); // 调试输出
+    document.getElementById("results").innerHTML =
+      "数据加载完成，请输入塔罗牌名称进行搜索。";
+  })
+  .catch((error) => {
+    console.error("Error loading Excel file:", error);
+    document.getElementById("results").innerHTML = "加载 Excel 文件时出错。";
+  });
 
 // 监听文件上传
 document
