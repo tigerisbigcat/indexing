@@ -1,16 +1,16 @@
 let excelData = null; // 用来存储Excel数据
 
 const githubExcelUrl =
-  "https://github.com/tigerisbigcat/indexing/blob/main/taluo.xlsx";
+  "https://raw.githubusercontent.com/tigerisbigcat/indexing/main/taluo.xlsx"; // 使用原始文件链接
 
 fetch(githubExcelUrl)
-  .then((response) => response.arrayBuffer())
+  .then((response) => response.arrayBuffer()) // 将响应转换为 ArrayBuffer
   .then((data) => {
     const workbook = XLSX.read(new Uint8Array(data), { type: "array" });
-    const sheetName = workbook.SheetNames[0];
+    const sheetName = workbook.SheetNames[0]; // 获取第一个sheet
     const sheet = workbook.Sheets[sheetName];
-    excelData = XLSX.utils.sheet_to_json(sheet);
-    console.log(excelData);
+    excelData = XLSX.utils.sheet_to_json(sheet); // 将表格数据转换为 JSON
+    console.log(excelData); // 调试输出
     document.getElementById("results").innerHTML =
       "数据加载完成，请输入塔罗牌名称进行搜索。";
   })
