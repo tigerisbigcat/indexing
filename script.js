@@ -1,18 +1,16 @@
 let excelData = null; // 用来存储Excel数据
 
-// GitHub Raw 链接
+// 从 GitHub 加载 Excel 文件 (通过 CORS 代理)
 const githubExcelUrl =
   "https://github.com/tigerisbigcat/indexing/raw/refs/heads/main/taluo.xlsx";
-
-// CORS 代理 URL
-const corsProxy = "https://cors-anywhere.herokuapp.com/";
+const corsProxy = "https://cors-anywhere.herokuapp.com/"; // 使用 CORS 代理
 
 // 使用 fetch 请求从 GitHub 获取文件
 fetch(corsProxy + githubExcelUrl)
   .then((response) => response.arrayBuffer()) // 将响应转换为 ArrayBuffer
   .then((data) => {
     const workbook = XLSX.read(new Uint8Array(data), { type: "array" });
-    const sheetName = workbook.SheetNames[0]; // 获取第一个 sheet
+    const sheetName = workbook.SheetNames[0]; // 获取第一个sheet
     const sheet = workbook.Sheets[sheetName];
     excelData = XLSX.utils.sheet_to_json(sheet); // 将表格数据转换为 JSON
     console.log(excelData); // 调试输出
