@@ -1,19 +1,16 @@
 let excelData = null; // 用来存储Excel数据
 
-// 从 GitHub 加载 Excel 文件 (通过 CORS 代理)
 const githubExcelUrl =
-  "https://github.com/tigerisbigcat/indexing/raw/refs/heads/main/taluo.xlsx";
-const corsProxy = "https://cors-anywhere.herokuapp.com/"; // 使用 CORS 代理
+  "https://github.com/tigerisbigcat/indexing/blob/main/taluo.xlsx";
 
-// 使用 fetch 请求从 GitHub 获取文件
-fetch(corsProxy + githubExcelUrl)
-  .then((response) => response.arrayBuffer()) // 将响应转换为 ArrayBuffer
+fetch(githubExcelUrl)
+  .then((response) => response.arrayBuffer())
   .then((data) => {
     const workbook = XLSX.read(new Uint8Array(data), { type: "array" });
-    const sheetName = workbook.SheetNames[0]; // 获取第一个sheet
+    const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
-    excelData = XLSX.utils.sheet_to_json(sheet); // 将表格数据转换为 JSON
-    console.log(excelData); // 调试输出
+    excelData = XLSX.utils.sheet_to_json(sheet);
+    console.log(excelData);
     document.getElementById("results").innerHTML =
       "数据加载完成，请输入塔罗牌名称进行搜索。";
   })
