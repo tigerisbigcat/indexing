@@ -3,6 +3,7 @@ let excelData = null; // 用来存储Excel数据
 // 从 GitHub 加载 Excel 文件
 const githubExcelUrl =
   "https://github.com/tigerisbigcat/indexing/raw/refs/heads/main/taluo.xlsx"; // 使用 GitHub 的 raw 内容链接
+const corsProxy = "https://cors-anywhere.herokuapp.com/"; // 使用 CORS 代理
 
 // 使用 fetch 请求从 GitHub 获取文件
 fetch(githubExcelUrl)
