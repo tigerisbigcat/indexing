@@ -1,13 +1,14 @@
 let excelData = null; // 用来存储Excel数据
 
+// GitHub Raw 链接
 const githubExcelUrl =
-  "https://raw.githubusercontent.com/tigerisbigcat/indexing/main/taluo.xlsx"; // 使用原始文件链接
+  "https://github.com/tigerisbigcat/indexing/raw/refs/heads/main/taluo.xlsx";
 
 fetch(githubExcelUrl)
   .then((response) => response.arrayBuffer()) // 将响应转换为 ArrayBuffer
   .then((data) => {
     const workbook = XLSX.read(new Uint8Array(data), { type: "array" });
-    const sheetName = workbook.SheetNames[0]; // 获取第一个sheet
+    const sheetName = workbook.SheetNames[0]; // 获取第一个 sheet
     const sheet = workbook.Sheets[sheetName];
     excelData = XLSX.utils.sheet_to_json(sheet); // 将表格数据转换为 JSON
     console.log(excelData); // 调试输出
@@ -17,27 +18,6 @@ fetch(githubExcelUrl)
   .catch((error) => {
     console.error("Error loading Excel file:", error);
     document.getElementById("results").innerHTML = "加载 Excel 文件时出错。";
-  });
-
-// 监听文件上传
-document
-  .getElementById("fileInput")
-  .addEventListener("change", function (event) {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      excelData = XLSX.utils.sheet_to_json(sheet);
-
-      // 将数据缓存到 LocalStorage
-      localStorage.setItem("excelData", JSON.stringify(excelData));
-
-      document.getElementById("results").innerHTML =
-        "数据加载完成，请输入塔罗牌名称进行搜索。";
-    };
-    reader.readAsArrayBuffer(event.target.files[0]);
   });
 
 // 监听输入框回车事件
@@ -52,7 +32,7 @@ document
       if (excelData) {
         const keywords = searchValue
           .split("，")
-          .map((keyword) => keyword.trim());
+          .map((keyword) => keyword.trim()); // 支持多个关键词
         let foundAny = false;
 
         keywords.forEach((keyword) => {
