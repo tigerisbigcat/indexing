@@ -4,7 +4,11 @@ let excelData = null; // 用来存储Excel数据
 const githubExcelUrl =
   "https://github.com/tigerisbigcat/indexing/raw/refs/heads/main/taluo.xlsx";
 
-fetch(githubExcelUrl)
+// CORS 代理 URL
+const corsProxy = "https://cors-anywhere.herokuapp.com/";
+
+// 使用 fetch 请求从 GitHub 获取文件
+fetch(corsProxy + githubExcelUrl)
   .then((response) => response.arrayBuffer()) // 将响应转换为 ArrayBuffer
   .then((data) => {
     const workbook = XLSX.read(new Uint8Array(data), { type: "array" });
