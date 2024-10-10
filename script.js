@@ -1,11 +1,14 @@
-let excelData = null; // 用来存储Excel数据
+let excelData = null;
 
-// 尝试从 LocalStorage 中加载缓存的 Excel 数据
+// 从 LocalStorage 中加载缓存的 Excel 数据
 const cachedExcelData = localStorage.getItem("excelData");
 if (cachedExcelData) {
   excelData = JSON.parse(cachedExcelData);
   document.getElementById("results").innerHTML =
     "已加载缓存数据，请输入塔罗牌名称进行搜索。";
+} else {
+  document.getElementById("results").innerHTML =
+    "请先上传塔罗牌文件或等待数据加载完成。";
 }
 
 // 监听文件上传
@@ -16,14 +19,13 @@ document
     reader.onload = function (e) {
       const data = new Uint8Array(e.target.result);
       const workbook = XLSX.read(data, { type: "array" });
-      const sheetName = workbook.SheetNames[0]; // 获取第一个 sheet
+      const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
-      excelData = XLSX.utils.sheet_to_json(sheet); // 将 Excel 转换为 JSON
+      excelData = XLSX.utils.sheet_to_json(sheet);
 
-      // 缓存到 LocalStorage 中
+      // 将数据缓存到 LocalStorage
       localStorage.setItem("excelData", JSON.stringify(excelData));
 
-      console.log(excelData); // 调试输出
       document.getElementById("results").innerHTML =
         "数据加载完成，请输入塔罗牌名称进行搜索。";
     };
@@ -42,7 +44,7 @@ document
       if (excelData) {
         const keywords = searchValue
           .split("，")
-          .map((keyword) => keyword.trim()); // 支持多个关键词
+          .map((keyword) => keyword.trim());
         let foundAny = false;
 
         keywords.forEach((keyword) => {
