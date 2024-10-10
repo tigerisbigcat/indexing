@@ -1,31 +1,24 @@
 let excelData = null; // 用来存储Excel数据
 
-// 页面加载时检查localStorage中是否有存储的Excel数据
-window.onload = function () {
-  const savedData = localStorage.getItem("excelData");
-  if (savedData) {
-    excelData = JSON.parse(savedData); // 将JSON字符串转换回对象
-    document.getElementById("results").innerHTML = "已加载存储的Excel数据。";
-  }
-};
+// 从 GitHub 加载 Excel 文件
+const githubExcelUrl =
+  "https://raw.githubusercontent.com/your-username/your-repo/main/塔罗牌.xlsx"; // 使用 GitHub 上的原始内容链接
 
-// 监听文件上传
-document
-  .getElementById("fileInput")
-  .addEventListener("change", function (event) {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheetName = workbook.SheetNames[0]; // 获取第一个sheet
-      const sheet = workbook.Sheets[sheetName];
-      excelData = XLSX.utils.sheet_to_json(sheet);
-      console.log(excelData); // 打印数据进行调试
-      localStorage.setItem("excelData", JSON.stringify(excelData)); // 将数据存储到localStorage
-      document.getElementById("results").innerHTML =
-        "文件已上传并存储，下次无需再次上传。";
-    };
-    reader.readAsArrayBuffer(event.target.files[0]);
+// 使用 fetch 请求从 GitHub 获取文件
+fetch(githubExcelUrl)
+  .then((response) => response.arrayBuffer()) // 将响应转换为 ArrayBuffer
+  .then((data) => {
+    const workbook = XLSX.read(new Uint8Array(data), { type: "array" });
+    const sheetName = workbook.SheetNames[0]; // 获取第一个sheet
+    const sheet = workbook.Sheets[sheetName];
+    excelData = XLSX.utils.sheet_to_json(sheet); // 将表格数据转换为 JSON
+    console.log(excelData); // 调试输出
+    document.getElementById("results").innerHTML =
+      "数据加载完成，请输入塔罗牌名称进行搜索。";
+  })
+  .catch((error) => {
+    console.error("Error loading Excel file:", error);
+    document.getElementById("results").innerHTML = "加载 Excel 文件时出错。";
   });
 
 // 监听输入框回车事件
@@ -35,26 +28,29 @@ document
     if (event.key === "Enter") {
       const searchValue = event.target.value.trim();
       const outputDiv = document.getElementById("results");
+      outputDiv.innerHTML = ""; // 清空上次的搜索结果
+
       if (excelData) {
-        const searchValues = searchValue.split("，").map((val) => val.trim()); // 将输入的关键词用逗号分隔，并去除多余的空格
-        let foundResults = false;
-        outputDiv.innerHTML = ""; // 清空之前的搜索结果
-        searchValues.forEach((searchVal) => {
-          const result = excelData.find(
-            (row) => row["塔罗牌名称"] === searchVal
-          );
+        const keywords = searchValue
+          .split("，")
+          .map((keyword) => keyword.trim()); // 支持多个关键词
+        let foundAny = false;
+
+        keywords.forEach((keyword) => {
+          const result = excelData.find((row) => row["塔罗牌名称"] === keyword);
           if (result) {
-            foundResults = true;
             outputDiv.innerHTML += `<div class="result-block"><h3>${result["塔罗牌名称"]}</h3><p>${result["解读内容"]}</p></div>`;
+            foundAny = true;
           } else {
-            outputDiv.innerHTML += `未找到对应的塔罗牌: ${searchVal}<br>`;
+            outputDiv.innerHTML += `<div class="result-block">未找到对应的塔罗牌: ${keyword}</div>`;
           }
         });
-        if (!foundResults) {
-          outputDiv.innerHTML = `未找到任何结果: ${searchValue}`;
+
+        if (!foundAny) {
+          outputDiv.innerHTML = `未找到相关塔罗牌: ${searchValue}`;
         }
       } else {
-        outputDiv.innerHTML = "请先上传塔罗牌文件。";
+        outputDiv.innerHTML = "请先等待数据加载完成。";
       }
     }
   });
