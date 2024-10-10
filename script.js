@@ -1,25 +1,33 @@
 let excelData = null; // 用来存储Excel数据
 
-// 从 GitHub 加载 Excel 文件
-const githubExcelUrl =
-  "https://raw.githubusercontent.com/tigerisbigcat/indexing/main/taluo.xlsx";
-const corsProxy = "https://cors-anywhere.herokuapp.com/"; // 使用 CORS 代理
+// 尝试从 LocalStorage 中加载缓存的 Excel 数据
+const cachedExcelData = localStorage.getItem("excelData");
+if (cachedExcelData) {
+  excelData = JSON.parse(cachedExcelData);
+  document.getElementById("results").innerHTML =
+    "已加载缓存数据，请输入塔罗牌名称进行搜索。";
+}
 
-// 使用 fetch 请求从 GitHub 获取文件
-fetch(githubExcelUrl)
-  .then((response) => response.arrayBuffer()) // 将响应转换为 ArrayBuffer
-  .then((data) => {
-    const workbook = XLSX.read(new Uint8Array(data), { type: "array" });
-    const sheetName = workbook.SheetNames[0]; // 获取第一个sheet
-    const sheet = workbook.Sheets[sheetName];
-    excelData = XLSX.utils.sheet_to_json(sheet); // 将表格数据转换为 JSON
-    console.log(excelData); // 调试输出
-    document.getElementById("results").innerHTML =
-      "数据加载完成，请输入塔罗牌名称进行搜索。";
-  })
-  .catch((error) => {
-    console.error("Error loading Excel file:", error);
-    document.getElementById("results").innerHTML = "加载 Excel 文件时出错。";
+// 监听文件上传
+document
+  .getElementById("fileInput")
+  .addEventListener("change", function (event) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0]; // 获取第一个 sheet
+      const sheet = workbook.Sheets[sheetName];
+      excelData = XLSX.utils.sheet_to_json(sheet); // 将 Excel 转换为 JSON
+
+      // 缓存到 LocalStorage 中
+      localStorage.setItem("excelData", JSON.stringify(excelData));
+
+      console.log(excelData); // 调试输出
+      document.getElementById("results").innerHTML =
+        "数据加载完成，请输入塔罗牌名称进行搜索。";
+    };
+    reader.readAsArrayBuffer(event.target.files[0]);
   });
 
 // 监听输入框回车事件
@@ -51,7 +59,7 @@ document
           outputDiv.innerHTML = `未找到相关塔罗牌: ${searchValue}`;
         }
       } else {
-        outputDiv.innerHTML = "请先等待数据加载完成。";
+        outputDiv.innerHTML = "请先上传塔罗牌文件或等待数据加载完成。";
       }
     }
   });
