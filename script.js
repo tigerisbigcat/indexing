@@ -35,9 +35,13 @@ document
         let foundAny = false;
 
         keywords.forEach((keyword) => {
-          const result = excelData.find((row) => row["塔罗牌名称"] === keyword);
-          if (result) {
-            outputDiv.innerHTML += `<div class="result-block"><h3>${result["塔罗牌名称"]}</h3><p>${result["解读内容"]}</p></div>`;
+          const results = excelData.filter(
+            (row) => row["塔罗牌名称"] === keyword
+          );
+          if (results.length > 0) {
+            results.forEach((result) => {
+              outputDiv.innerHTML += `<div class="result-block"><h3>${result["塔罗牌名称"]}</h3><p>${result["解读内容"]}</p></div>`;
+            });
             foundAny = true;
           } else {
             outputDiv.innerHTML += `<div class="result-block">未找到对应的塔罗牌: ${keyword}</div>`;
